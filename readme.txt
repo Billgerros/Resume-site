@@ -1,1 +1,1 @@
-Resume site for Bill Gerros
+Personal site for Bill Gerros
