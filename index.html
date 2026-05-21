@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BATCOMPUTER // GERROS</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020804;
+  --panel:#030d06;
+  --border:#0a3018;
+  --border-bright:#0d5025;
+  --green:#00ff88;
+  --green-dim:#00aa55;
+  --green-faint:#003311;
+  --cyan:#00ffee;
+  --yellow:#f0b429;
+  --yellow-dim:#996b00;
+  --red:#ff3a2f;
+  --orange:#ff8c00;
+  --text:#00dd77;
+  --muted:#005533;
+  --font:'Share Tech Mono','Courier New',monospace;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:12px;overflow-x:hidden}
+
+/* Scanlines */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.12) 2px,rgba(0,0,0,0.12) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+body{text-shadow:0 0 6px rgba(0,255,136,0.25)}
+
+.wrapper{
+  max-width:1700px;margin:0 auto;padding:10px;
+  display:flex;flex-direction:column;gap:8px;min-height:100vh;
+}
+
+/* ── HEADER ── */
+.header{
+  display:grid;grid-template-columns:auto 1fr auto;
+  align-items:center;gap:16px;padding:14px 20px;
+  border:1px solid var(--border-bright);background:var(--panel);
+  position:relative;overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.03),transparent);
+  animation:sweep 5s linear infinite;
+}
+@keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+.bat-logo{font-size:40px;filter:drop-shadow(0 0 12px rgba(240,180,41,0.9));animation:batpulse 3s ease-in-out infinite}
+@keyframes batpulse{0%,100%{filter:drop-shadow(0 0 12px rgba(240,180,41,0.9))}50%{filter:drop-shadow(0 0 24px rgba(240,180,41,1))}}
+
+.header-center{text-align:center}
+.header-title{
+  font-size:clamp(30px,5vw,58px);font-weight:900;
+  color:var(--green);letter-spacing:0.35em;
+  text-shadow:0 0 20px rgba(0,255,136,0.9),0 0 50px rgba(0,255,136,0.4),0 0 80px rgba(0,255,136,0.2);
+  animation:flicker 12s infinite;
+}
+@keyframes flicker{0%,94%,96%,98%,100%{opacity:1}95%{opacity:0.7}97%{opacity:0.85}99%{opacity:0.6}}
+
+.header-sub{font-size:10px;letter-spacing:0.22em;color:var(--muted);margin-top:5px}
+.header-greeting{font-size:11px;letter-spacing:0.12em;color:var(--green-dim);margin-top:2px}
+
+.header-status{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.status-row{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--green-dim)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s ease-in-out infinite}
+.dot.yellow{background:var(--yellow);box-shadow:0 0 6px var(--yellow);animation-delay:.6s}
+.dot.red{background:var(--red);box-shadow:0 0 6px var(--red);animation-delay:1.2s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
+
+/* ── TICKER ── */
+.ticker-wrap{
+  overflow:hidden;border:1px solid var(--border);
+  padding:5px 10px;background:rgba(0,0,0,0.4);
+  font-size:10px;color:var(--muted);
+}
+.ticker-inner{white-space:nowrap;animation:ticker 45s linear infinite}
+@keyframes ticker{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+
+/* ── LAYOUT ── */
+.dashboard{display:grid;grid-template-columns:2fr 1fr;gap:8px;flex:1}
+.bottom-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* ── PANEL ── */
+.panel{
+  border:1px solid var(--border-bright);background:var(--panel);
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+}
+.panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  opacity:0.4;
+}
+.panel-header{
+  padding:7px 12px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(0,255,136,0.03);
+}
+.panel-title{font-size:11px;letter-spacing:0.14em;color:var(--yellow);text-shadow:0 0 8px rgba(240,180,41,0.4)}
+.panel-badge{font-size:9px;padding:2px 6px;border:1px solid var(--border-bright);color:var(--green-dim);letter-spacing:0.08em}
+.panel-badge.alert-badge{color:var(--red);border-color:rgba(255,58,47,0.5)}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.3)}
+.tab{
+  padding:5px 10px;font-size:10px;letter-spacing:0.08em;
+  color:var(--muted);cursor:pointer;border-right:1px solid var(--border);
+  transition:all 0.15s;user-select:none;
+}
+.tab:hover{color:var(--green-dim);background:rgba(0,255,136,0.03)}
+.tab.active{color:var(--green);background:rgba(0,255,136,0.05);border-bottom:2px solid var(--green)}
+.tab-content{display:none;flex:1;overflow:hidden;flex-direction:column}
+.tab-content.active{display:flex}
+
+/* ── PANEL BODY ── */
+.panel-body{flex:1;padding:10px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
+.panel-body::-webkit-scrollbar{width:3px}
+.panel-body::-webkit-scrollbar-thumb{background:var(--border-bright)}
+
+/* ── SECTION LABEL ── */
+.section-label{
+  font-size:9px;letter-spacing:0.18em;color:var(--muted);
+  padding-bottom:3px;border-bottom:1px solid var(--border);
+}
+
+/* ── DATA FEED ── */
+.feed-container{
+  font-size:10px;line-height:1.6;height:150px;overflow-y:auto;
+  border:1px solid var(--border);padding:6px 8px;background:rgba(0,0,0,0.35);
+}
+.feed-container::-webkit-scrollbar{width:3px}
+.feed-container::-webkit-scrollbar-thumb{background:var(--border-bright)}
+.feed-entry{display:flex;gap:8px;color:var(--green-dim);border-bottom:1px solid rgba(0,255,136,0.04);padding:2px 0}
+.feed-entry .ts{color:var(--muted);min-width:62px}
+.feed-entry .level{min-width:50px}
+.feed-entry .level.alert{color:var(--red)}
+.feed-entry .level.warn{color:var(--orange)}
+.feed-entry .level.info{color:var(--green-dim)}
+.feed-entry .msg{flex:1}
+
+/* ── HEATMAP ── */
+.heatmap{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;padding:8px;border:1px solid var(--border);background:rgba(0,0,0,0.3)}
+.heatmap-cell{aspect-ratio:1;border-radius:2px}
+
+/* ── STAT ROW ── */
+.stat-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:3px 0;border-bottom:1px solid rgba(0,255,136,0.04);font-size:10px;
+}
+.stat-row .label{color:var(--muted);letter-spacing:0.04em}
+.stat-row .value{color:var(--green)}
+.stat-row .value.warn{color:var(--orange)}
+.stat-row .value.alert{color:var(--red)}
+.stat-row .value.yellow{color:var(--yellow)}
+
+/* ── PROGRESS ── */
+.progress-wrap{display:flex;align-items:center;gap:8px;font-size:10px}
+.progress-label{min-width:120px;color:var(--muted)}
+.progress-bar{flex:1;height:5px;background:rgba(0,0,0,0.4);border:1px solid var(--border);overflow:hidden}
+.progress-fill{height:100%;background:var(--green);box-shadow:0 0 6px var(--green);transition:width 2s ease}
+.progress-fill.yellow{background:var(--yellow);box-shadow:0 0 6px var(--yellow)}
+.progress-fill.red{background:var(--red);box-shadow:0 0 6px var(--red)}
+.progress-pct{min-width:32px;text-align:right;color:var(--green)}
+
+/* ── PROFILE CARD ── */
+.profile-card{
+  border:1px solid var(--border);padding:7px 8px;background:rgba(0,0,0,0.2);
+  cursor:pointer;transition:border-color 0.15s;font-size:10px;
+}
+.profile-card:hover{border-color:var(--green-dim)}
+.profile-card.expanded{border-color:var(--yellow)}
+.profile-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.profile-name{color:var(--yellow);font-size:11px;letter-spacing:0.08em}
+.threat-badge{font-size:9px;padding:1px 5px;border:1px solid}
+.threat-badge.critical{color:var(--red);border-color:var(--red)}
+.threat-badge.high{color:var(--orange);border-color:var(--orange)}
+.threat-badge.medium{color:var(--yellow);border-color:var(--yellow)}
+.profile-detail{color:var(--muted);display:none;margin-top:5px;line-height:1.7;font-size:9px}
+.profile-card.expanded .profile-detail{display:block}
+
+/* ── VEHICLE ── */
+.vehicle-status{border:1px solid var(--border);padding:8px;background:rgba(0,0,0,0.2);display:flex;flex-direction:column;gap:4px}
+.vehicle-name{color:var(--yellow);font-size:10px;letter-spacing:0.12em;margin-bottom:4px;display:flex;justify-content:space-between}
+.online-indicator{font-size:9px;color:var(--green)}
+
+/* ── JL FILES ── */
+.jl-file{border:1px solid var(--border);padding:6px 8px;background:rgba(0,0,0,0.3);font-size:10px;margin-bottom:4px}
+.jl-file-header{display:flex;justify-content:space-between;align-items:center}
+.jl-name{color:var(--yellow);font-size:10px;letter-spacing:0.08em}
+.classified-badge{font-size:8px;color:var(--red);border:1px solid rgba(255,58,47,0.5);padding:0 4px;letter-spacing:0.05em}
+.jl-detail{color:var(--muted);font-size:9px;margin-top:3px;line-height:1.6}
+
+/* ── WAYNE CORP ── */
+.stock-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:10px}
+.stock-sym{color:var(--yellow)}
+.stock-price{color:var(--green)}
+.stock-change{font-size:9px}
+.stock-change.up{color:var(--green)}
+.stock-change.down{color:var(--red)}
+
+/* ── SCAN ANIM ── */
+.scan-animation{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.scan-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);animation:scanpulse 1s ease-in-out infinite}
+@keyframes scanpulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:0.4}}
+
+/* ── ANIMATIONS ── */
+.blink{animation:textblink 1.4s step-end infinite}
+@keyframes textblink{0%,100%{opacity:1}50%{opacity:0}}
+.cursor::after{content:'█';animation:cursorblink 1s step-end infinite;color:var(--green)}
+@keyframes cursorblink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── FOOTER ── */
+.footer{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 16px;border:1px solid var(--border-bright);
+  background:var(--panel);font-size:10px;color:var(--muted);
+  flex-wrap:wrap;gap:8px;
+}
+.footer a{color:var(--green-dim);text-decoration:none;letter-spacing:0.1em}
+.footer a:hover{color:var(--green);text-shadow:0 0 8px rgba(0,255,136,0.5)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1000px){.dashboard{grid-template-columns:1fr}.bottom-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- ══ HEADER ══ -->
+  <header class="header">
+    <div class="bat-logo">🦇</div>
+    <div class="header-center">
+      <div class="header-title">GERROS</div>
+      <div class="header-sub">WAYNE MANOR INTELLIGENCE SYSTEM · BATCOMPUTER v7.3.1 · LEVEL 5 CLEARANCE</div>
+      <div class="header-greeting">WELCOME BACK, MASTER WAYNE — <span id="clock">--:--:--</span> EST · <span id="date-display">---</span></div>
+    </div>
+    <div class="header-status">
+      <div class="status-row"><span class="dot"></span> ALL SYSTEMS ONLINE</div>
+      <div class="status-row"><span class="dot yellow"></span> THREAT LEVEL: <span style="color:var(--orange)">ELEVATED</span></div>
+      <div class="status-row"><span class="dot red"></span> ACTIVE INCIDENTS: <span id="incident-count">3</span></div>
+      <div class="status-row"><span class="dot"></span> ENCRYPTION: AES-512 ACTIVE</div>
+    </div>
+  </header>
+
+  <!-- ══ TICKER ══ -->
+  <div class="ticker-wrap">
+    <div class="ticker-inner">
+      ◆ GCPD DISPATCH: 10-34 reported Narrows District / Unit 47 en route ◆ FACIAL RECOG: "Two-Bit Tommy" Carbone flagged — Amusement Mile cam-7 ◆ BATMOBILE: All systems nominal — Manor Garage B ◆ JOKER: Last confirmed sighting Ace Chemicals — 72 hrs ago ◆ WAYNE ENTERPRISES: Q3 board meeting tomorrow 09:00 — ATTENDANCE REQUIRED ◆ PENGUIN: Active at Iceberg Lounge — arms shipment FC-91 FLAGGED ◆ ALERT: Unidentified compound PORT-2204 — origin unknown ◆ ARMOR Mk.VIII stress test: 91% complete ◆ JUSTICE LEAGUE: Contingency BABEL files locked — Level 5 only ◆ TWO-FACE: Extortion ring active — financial district ◆ RIDDLER: Three new ciphers left at GCPD — pattern ESCALATING ◆
+    </div>
+  </div>
+
+  <!-- ══ MAIN GRID ══ -->
+  <div class="dashboard">
+
+    <!-- ■ SURVEILLANCE PANEL (left, wide) -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">⚡ LIVE SURVEILLANCE &amp; PATROL DATA</div>
+        <div class="panel-badge blink">● LIVE FEED</div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('surv','gcpd',this)">GCPD DATABASE</div>
+        <div class="tab" onclick="switchTab('surv','traffic',this)">TRAFFIC / TRANSIT</div>
+        <div class="tab" onclick="switchTab('surv','facial',this)">FACIAL RECOGNITION</div>
+      </div>
+
+      <!-- GCPD -->
+      <div class="tab-content active" id="surv-gcpd">
+        <div class="panel-body">
+          <div class="section-label">// ENCRYPTED POLICE SCANNER — REAL-TIME DISPATCH LOGS</div>
+          <div class="feed-container" id="gcpd-feed"></div>
+          <div class="section-label">// 911 CALL HEATMAP — GOTHAM DISTRICTS</div>
+          <div class="heatmap" id="heatmap"></div>
+          <div style="display:flex;gap:20px;font-size:9px;color:var(--muted)">
+            <span>■ <span style="color:var(--red)">CRITICAL</span></span>
+            <span>■ <span style="color:var(--orange)">HIGH</span></span>
+            <span>■ <span style="color:var(--yellow)">MOD</span></span>
+            <span>■ <span style="color:var(--green-dim)">LOW</span></span>
+            <span style="margin-left:auto">DISTRICTS: NARROWS · AMUSEMENT MILE · PARK ROW · UPTOWN · BURNLEY · TRICORNER</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRAFFIC -->
+      <div class="tab-content" id="surv-traffic">
+        <div class="panel-body">
+          <div class="section-label">// GOTHAM BRIDGE &amp; TUNNEL STATUS — LIVE MONITORING</div>
+          <div class="stat-row"><span class="label">Sprang Bridge (N/S lanes)</span><span class="value">CLEAR — EST. 12 MIN CROSSING</span></div>
+          <div class="stat-row"><span class="label">O'Neil Tunnel (E bound)</span><span class="value warn">CONGESTED — AVOID · 38 MIN DELAY</span></div>
+          <div class="stat-row"><span class="label">Finger River Crossing</span><span class="value">CLEAR — EST. 8 MIN CROSSING</span></div>
+          <div class="stat-row"><span class="label">Burnley Overpass</span><span class="value alert">CLOSED — GCPD INCIDENT IN PROGRESS</span></div>
+          <div class="stat-row"><span class="label">Dixon Docks Causeway</span><span class="value">CLEAR — EST. 6 MIN CROSSING</span></div>
+          <div class="stat-row"><span class="label">Old Gotham Canal Route</span><span class="value warn">UNMONITORED ZONE — CAUTION</span></div>
+          <div class="section-label" style="margin-top:6px">// GOTHAM RAPID TRANSIT &amp; SUBWAY GRID</div>
+          <div class="stat-row"><span class="label">Line 3 — Narrows ↔ Downtown</span><span class="value">OPERATIONAL</span></div>
+          <div class="stat-row"><span class="label">Line 7 — Park Row ↔ Amusement Mile</span><span class="value warn">DELAYED 14 MIN — SIGNAL FAULT</span></div>
+          <div class="stat-row"><span class="label">Line 12 — Burnley ↔ Uptown</span><span class="value alert">SUSPENDED — POLICE ACTION</span></div>
+          <div class="stat-row"><span class="label">Line 4 — Tricorner ↔ Midtown</span><span class="value">OPERATIONAL</span></div>
+          <div class="section-label" style="margin-top:6px">// GOTHAM CITY INTERNATIONAL AIRPORT</div>
+          <div class="stat-row"><span class="label">GCA Airways 447 (Metropolis)</span><span class="value">DEP 23:15 — ON TIME</span></div>
+          <div class="stat-row"><span class="label">Wayne Enterprises Jet — N-BRUCE1</span><span class="value yellow">STANDBY — HANGAR 12 FUELED</span></div>
+          <div class="stat-row"><span class="label">Cargo Freighter FC-91 (Black Mask)</span><span class="value alert">FLAGGED — MONITORING IN PROGRESS</span></div>
+          <div class="stat-row"><span class="label">Unmarked charter — tail N7741</span><span class="value warn">UNVERIFIED MANIFEST — TRACKING</span></div>
+        </div>
+      </div>
+
+      <!-- FACIAL RECOGNITION -->
+      <div class="tab-content" id="surv-facial">
+        <div class="panel-body">
+          <div class="section-label">// BIOMETRIC SCAN — GOTHAM STREET CAMERA NETWORK</div>
+          <div class="scan-animation">
+            <span class="scan-dot"></span>
+            <span>SCANNING LIVE ·  <span id="cam-count">847</span> ACTIVE FEEDS · <span id="scan-rate">2.4K</span> FACES/SEC · DB VERSION 12.4</span>
+          </div>
+          <div class="section-label">// RECENT FLAGGED MATCHES</div>
+          <div class="feed-container" id="facial-feed"></div>
+          <div class="section-label" style="margin-top:4px">// ORGANIZED CRIME ACTIVITY INDEX — CURRENT QUARTER</div>
+          <div class="progress-wrap">
+            <span class="progress-label">Black Mask Organization</span>
+            <div class="progress-bar"><div class="progress-fill red" style="width:89%"></div></div>
+            <span class="progress-pct" style="color:var(--red)">89%</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">Falcone Crime Family</span>
+            <div class="progress-bar"><div class="progress-fill yellow" style="width:72%"></div></div>
+            <span class="progress-pct" style="color:var(--yellow)">72%</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">Maroni Syndicate</span>
+            <div class="progress-bar"><div class="progress-fill yellow" style="width:48%"></div></div>
+            <span class="progress-pct" style="color:var(--yellow)">48%</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">Narrows Street Dealers</span>
+            <div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div>
+            <span class="progress-pct">35%</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">Penguin — Iceberg Network</span>
+            <div class="progress-bar"><div class="progress-fill yellow" style="width:61%"></div></div>
+            <span class="progress-pct" style="color:var(--yellow)">61%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ■ CRIMINAL PROFILES (right) -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">☠ CRIMINAL PROFILES</div>
+        <div class="panel-badge">DB v12.4</div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('crim','rogues',this)">ROGUES GALLERY</div>
+        <div class="tab" onclick="switchTab('crim','evidence',this)">TRACE EVIDENCE</div>
+      </div>
+
+      <!-- ROGUES GALLERY -->
+      <div class="tab-content active" id="crim-rogues">
+        <div class="panel-body">
+          <div class="section-label">// ACTIVE THREAT DOSSIERS — TAP ENTRY TO EXPAND</div>
+
+          <div class="profile-card" onclick="toggleProfile(this)">
+            <div class="profile-header">
+              <div class="profile-name">THE JOKER [IDENTITY: UNKNOWN]</div>
+              <div class="threat-badge critical">CRITICAL</div>
+            </div>
+            <div style="font-size:9px;color:var(--muted)">Last Seen: Ace Chemicals — 72 hrs ago</div>
+            <div class="profile-detail">
+              Psych Eval: Extreme psychopathy, nihilistic anti-social disorder. IQ: unmeasurable.<br>
+              Hideouts: Ace Chemicals, Monarch Theatre (condemned), Storm Drain Network C-7<br>
+              Current Threat: Joker toxin synthesis — PORT-2204 chemical trace match 94.7%.<br>
+              Confrontations logged: 47. Captures: 31. Arkham escapes: 31. Containment: NONE.
+            </div>
+          </div>
+
+          <div class="profile-card" onclick="toggleProfile(this)">
+            <div class="profile-header">
+              <div class="profile-name">PENGUIN [OSWALD COBBLEPOT]</div>
+              <div class="threat-badge high">HIGH</div>
+            </div>
+            <div style="font-size:9px;color:var(--muted)">Last Seen: Iceberg Lounge — 6 hrs ago</div>
+            <div class="profile-detail">
+              Psych Eval: Narcissistic, highly competent, status-obsessed. IQ: 147.<br>
+              Hideouts: Iceberg Lounge (primary), Old Gotham Aviary (backup)<br>
+              Current Op: Arms smuggling via GC Airport — cargo FC-91 flagged and tracked.<br>
+              Incarcerated: Blackgate (released 4 months ago). Recidivism: confirmed.
+            </div>
+          </div>
+
+          <div class="profile-card" onclick="toggleProfile(this)">
+            <div class="profile-header">
+              <div class="profile-name">TWO-FACE [HARVEY DENT]</div>
+              <div class="threat-badge high">HIGH</div>
+            </div>
+            <div style="font-size:9px;color:var(--muted)">Last Seen: Gotham Courthouse — 3 days ago</div>
+            <div class="profile-detail">
+              Psych Eval: Dissociative identity disorder, obsessive coin-flip ritual. IQ: 162.<br>
+              Hideouts: Old DA office (Park Row), Janus Hotel penthouse (Uptown)<br>
+              Current Op: Extortion ring targeting Gotham financial district — 14 victims so far.<br>
+              Note: High courthouse return probability — avoid District 4 corridor tonight.
+            </div>
+          </div>
+
+          <div class="profile-card" onclick="toggleProfile(this)">
+            <div class="profile-header">
+              <div class="profile-name">MR. FREEZE [VICTOR FRIES]</div>
+              <div class="threat-badge medium">MEDIUM</div>
+            </div>
+            <div style="font-size:9px;color:var(--muted)">Last Seen: GothCorp Cold Storage — 1 week ago</div>
+            <div class="profile-detail">
+              Psych Eval: Grief-driven obsession, emotionally contained, brilliant engineer. IQ: 189.<br>
+              Hideouts: GothCorp Sub-Level 3, Gotham Glacier Storage Facility<br>
+              Current Op: Sourcing cryo-tech components — Nora Fries project Phase 2 suspected.<br>
+              Note: Cryo-suit is Class-4 resistance. Non-lethal containment extremely difficult.
+            </div>
+          </div>
+
+          <div class="profile-card" onclick="toggleProfile(this)">
+            <div class="profile-header">
+              <div class="profile-name">RIDDLER [EDWARD NYGMA]</div>
+              <div class="threat-badge medium">MEDIUM</div>
+            </div>
+            <div style="font-size:9px;color:var(--muted)">Last Seen: Nygmatech Ruins — 5 days ago</div>
+            <div class="profile-detail">
+              Psych Eval: Obsessive-compulsive, pathological need for intellectual validation. IQ: 194.<br>
+              Hideouts: Abandoned Nygmatech HQ, Gotham University server room (suspected)<br>
+              Current Op: 3 ciphers left at GCPD this week. Pattern escalating. Decoded reference: Wayne Tower east wing — increasing security patrols.<br>
+              Note: Do not underestimate. Every clue is a trap.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRACE EVIDENCE -->
+      <div class="tab-content" id="crim-evidence">
+        <div class="panel-body">
+          <div class="section-label">// AUTOMATED FORENSIC DIAGNOSTIC — CROSS-REFERENCE ENGINE</div>
+          <div class="progress-wrap">
+            <span class="progress-label">Chemical Residue DB</span>
+            <div class="progress-bar"><div class="progress-fill" id="chem-bar" style="width:78%"></div></div>
+            <span class="progress-pct" id="chem-pct">78%</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">Ballistics Cross-Ref</span>
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+            <span class="progress-pct">DONE</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">Dental/Medical Records</span>
+            <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
+            <span class="progress-pct">55%</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">Fibre Analysis</span>
+            <div class="progress-bar"><div class="progress-fill yellow" style="width:88%"></div></div>
+            <span class="progress-pct" style="color:var(--yellow)">88%</span>
+          </div>
+          <div class="section-label" style="margin-top:6px">// ACTIVE COMPOUND MATCHES</div>
+          <div class="stat-row"><span class="label">CS-7 Nerve Agent (PORT-2204)</span><span class="value alert">JOKER — 94.7% MATCH</span></div>
+          <div class="stat-row"><span class="label">Ballistics: .45 Casull hollow-pt</span><span class="value warn">FALCONE FAMILY — 81.2%</span></div>
+          <div class="stat-row"><span class="label">Cryo-treated leather fibres</span><span class="value yellow">FRIES — 88.4%</span></div>
+          <div class="stat-row"><span class="label">Pheromone-X compound</span><span class="value yellow">POISON IVY — 91.1%</span></div>
+          <div class="stat-row"><span class="label">Dental: Partial molar 002-C</span><span class="value" style="color:var(--muted)">MATCH PENDING</span></div>
+          <div class="section-label" style="margin-top:6px">// PRIORITY UNIDENTIFIED SAMPLE</div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.7;padding:6px;border:1px solid var(--border);background:rgba(0,0,0,0.3)">
+            SAMPLE PORT-2204: 3-chloro-phenethyl base with unknown polymer chains and trace barium salt. <span style="color:var(--orange)">No match in known toxin database.</span> Aerosolization potential: HIGH. Forwarding to R&amp;D synthesis module. Priority: URGENT.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end .dashboard -->
+
+  <!-- ══ BOTTOM ROW ══ -->
+  <div class="bottom-row">
+
+    <!-- ■ GEAR & LOGISTICS -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">⚙ GEAR &amp; LOGISTICS</div>
+        <div class="panel-badge">ALL UNITS</div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('gear','diag',this)">DIAGNOSTICS</div>
+        <div class="tab" onclick="switchTab('gear','research',this)">RESEARCH &amp; FORMULAS</div>
+      </div>
+
+      <div class="tab-content active" id="gear-diag">
+        <div class="panel-body">
+          <div class="vehicle-status">
+            <div class="vehicle-name">BATMOBILE — UNIT 01 <span class="online-indicator blink">◆ ONLINE</span></div>
+            <div class="progress-wrap"><span class="progress-label">Power Cell</span><div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div><span class="progress-pct">87%</span></div>
+            <div class="progress-wrap"><span class="progress-label">Shielding</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">100%</span></div>
+            <div class="progress-wrap"><span class="progress-label">Afterburner</span><div class="progress-bar"><div class="progress-fill yellow" style="width:63%"></div></div><span class="progress-pct" style="color:var(--yellow)">63%</span></div>
+            <div class="stat-row"><span class="label">GPS Loc</span><span class="value">MANOR GARAGE B · LOCKED</span></div>
+          </div>
+          <div class="vehicle-status">
+            <div class="vehicle-name">BATPLANE — UNIT 03 <span class="online-indicator blink">◆ ONLINE</span></div>
+            <div class="progress-wrap"><span class="progress-label">Fuel</span><div class="progress-bar"><div class="progress-fill yellow" style="width:44%"></div></div><span class="progress-pct" style="color:var(--yellow)">44%</span></div>
+            <div class="progress-wrap"><span class="progress-label">Avionics</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">100%</span></div>
+            <div class="progress-wrap"><span class="progress-label">Stealth Mode</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">READY</span></div>
+            <div class="stat-row"><span class="label">Status</span><span class="value warn">REFUEL REQUIRED — HANGAR 7</span></div>
+          </div>
+          <div class="vehicle-status">
+            <div class="vehicle-name">UTILITY BELT — SET 7</div>
+            <div class="stat-row"><span class="label">Grapple Gun</span><span class="value">FULLY CHARGED</span></div>
+            <div class="stat-row"><span class="label">Batarangs</span><span class="value">12 / 12</span></div>
+            <div class="stat-row"><span class="label">Explosive Gel</span><span class="value warn">LOW — 2 CANISTERS REMAIN</span></div>
+            <div class="stat-row"><span class="label">Tracker Beacons</span><span class="value">4 ACTIVE · 2 STANDBY</span></div>
+            <div class="stat-row"><span class="label">Rebreather</span><span class="value">CHARGED · 22 MIN CAPACITY</span></div>
+            <div class="stat-row"><span class="label">EMP Device</span><span class="value">READY</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="gear-research">
+        <div class="panel-body">
+          <div class="section-label">// AI-ASSISTED SYNTHESIS &amp; MATERIALS R&amp;D MODULE</div>
+          <div class="progress-wrap">
+            <span class="progress-label">Joker Toxin Antidote v3.2</span>
+            <div class="progress-bar"><div class="progress-fill yellow" id="antidote-bar" style="width:67%"></div></div>
+            <span class="progress-pct" style="color:var(--yellow)" id="antidote-pct">67%</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">PORT-2204 Analysis</span>
+            <div class="progress-bar"><div class="progress-fill red" id="port-bar" style="width:23%"></div></div>
+            <span class="progress-pct" style="color:var(--red)" id="port-pct">23%</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">Armor Mk.VIII Stress Test</span>
+            <div class="progress-bar"><div class="progress-fill" id="armor-bar" style="width:91%"></div></div>
+            <span class="progress-pct" id="armor-pct">91%</span>
+          </div>
+          <div class="progress-wrap">
+            <span class="progress-label">Cryo-Counter Agent</span>
+            <div class="progress-bar"><div class="progress-fill" style="width:38%"></div></div>
+            <span class="progress-pct">38%</span>
+          </div>
+          <div class="section-label" style="margin-top:6px">// SYNTHESIS LOG</div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.8;padding:6px;border:1px solid var(--border);background:rgba(0,0,0,0.3)">
+            <div>› Antidote v3.2: sodium benzoate base — <span style="color:var(--green)">STABLE</span></div>
+            <div>› Adding modified phenothiazine compound — efficacy +12%</div>
+            <div>› PORT-2204: barium-salt binding agent identified — continuing</div>
+            <div>› Armor Mk.VIII: Nth metal weave at 3.2mm nominal — <span style="color:var(--yellow)">UNDER REVIEW</span></div>
+            <div>› Mk.VIII est. completion: <span style="color:var(--yellow)">14 days</span> · Projected rating: Class-6 ballistic</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ■ WAYNE ENTERPRISES -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">🏢 WAYNE ENTERPRISES</div>
+        <div class="panel-badge">EXEC ACCESS</div>
+      </div>
+      <div class="panel-body">
+        <div class="section-label">// STOCK OVERVIEW — NYSE: WE (LIVE)</div>
+        <div class="stock-row"><span class="stock-sym">WE</span><span class="stock-price" id="we-price">$412.77</span><span class="stock-change up" id="we-chg">▲ +2.14%</span></div>
+        <div class="stock-row"><span class="stock-sym">WE.TECH</span><span class="stock-price" id="wetech-price">$88.43</span><span class="stock-change down" id="wetech-chg">▼ -0.51%</span></div>
+        <div class="stock-row"><span class="stock-sym">WE.MED</span><span class="stock-price" id="wemed-price">$203.19</span><span class="stock-change up" id="wemed-chg">▲ +1.08%</span></div>
+        <div class="stock-row"><span class="stock-sym">WE.DEF</span><span class="stock-price" id="wedef-price">$341.05</span><span class="stock-change down" id="wedef-chg">▼ -0.22%</span></div>
+
+        <div class="section-label" style="margin-top:6px">// DIVISION STATUS</div>
+        <div class="stat-row"><span class="label">Applied Sciences (R&amp;D)</span><span class="value">NOMINAL — Lucius Fox LEAD</span></div>
+        <div class="stat-row"><span class="label">Wayne Biomedical</span><span class="value">NOMINAL — Q3 +14.2%</span></div>
+        <div class="stat-row"><span class="label">Wayne Defense Contracts</span><span class="value warn">REVIEW PENDING — Senate inquiry</span></div>
+        <div class="stat-row"><span class="label">Wayne Tech (Consumer)</span><span class="value">NOMINAL</span></div>
+        <div class="stat-row"><span class="label">Gotham City Orphanage Fund</span><span class="value">FUNDED · $4.2M disbursed</span></div>
+        <div class="stat-row"><span class="label">Applied Sciences Black Budget</span><span class="value yellow">CLEARED — Q3 ALLOCATED</span></div>
+
+        <div class="section-label" style="margin-top:6px">// EXECUTIVE ALERTS</div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.8">
+          <div>› Board meeting: Tomorrow 09:00 — <span style="color:var(--orange)">MANDATORY ATTENDANCE</span></div>
+          <div>› Senator Harmon: Defense contract audit request filed</div>
+          <div>› Lucius Fox: Lab Q3 access logs — approved &amp; sealed</div>
+          <div>› Cover integrity: <span style="color:var(--green)">MAINTAINED</span> · Playboy persona: ACTIVE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ■ CONTINGENCY FOLDERS -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">🔒 CONTINGENCY FOLDERS</div>
+        <div class="panel-badge alert-badge blink">TS/SCI · BABEL</div>
+      </div>
+      <div class="panel-body">
+        <div class="section-label">// JUSTICE LEAGUE — PROTOCOL BABEL · LEVEL 5 CLEARANCE ONLY</div>
+
+        <div class="jl-file">
+          <div class="jl-file-header">
+            <div class="jl-name">SUPERMAN [CLARK KENT · METROPOLIS]</div>
+            <div class="classified-badge">CLASSIFIED</div>
+          </div>
+          <div class="jl-detail">Vuln: Kryptonite (K-Class · synthetic stockpile: 3g). Freq override: 11.42 MHz. Counter: K-Dart delivery system, 0.3s deployment window. File v7.1.</div>
+        </div>
+
+        <div class="jl-file">
+          <div class="jl-file-header">
+            <div class="jl-name">WONDER WOMAN [DIANA · THEMYSCIRA]</div>
+            <div class="classified-badge">CLASSIFIED</div>
+          </div>
+          <div class="jl-detail">Vuln: Ceremonial binding constraint (historical). Counter: Lasso reversal protocol · Nth metal bracer disruption sequence. File v4.2.</div>
+        </div>
+
+        <div class="jl-file">
+          <div class="jl-file-header">
+            <div class="jl-name">THE FLASH [BARRY ALLEN · CENTRAL CITY]</div>
+            <div class="classified-badge">CLASSIFIED</div>
+          </div>
+          <div class="jl-detail">Vuln: Resonance frequency opposing speedster (99.47 THz). Counter: Speed Force containment trap · tachyon dampener field. File v5.0.</div>
+        </div>
+
+        <div class="jl-file">
+          <div class="jl-file-header">
+            <div class="jl-name">GREEN LANTERN [HAL JORDAN · SECTOR 2814]</div>
+            <div class="classified-badge">CLASSIFIED</div>
+          </div>
+          <div class="jl-detail">Vuln: Yellow spectrum · willpower depletion. Ring cycle: 24hr. Counter: Dual-spectrum emitter, disrupts construct cohesion in &lt;0.4s. File v3.8.</div>
+        </div>
+
+        <div class="jl-file">
+          <div class="jl-file-header">
+            <div class="jl-name">AQUAMAN [ARTHUR CURRY · ATLANTIS]</div>
+            <div class="classified-badge">CLASSIFIED</div>
+          </div>
+          <div class="jl-detail">Vuln: Dehydration (72hr+ exposure). Override: Atlantean telepathic frequency jamming. Counter: Dry-field sonic deployment. File v3.1.</div>
+        </div>
+
+        <div style="font-size:9px;color:var(--muted);margin-top:8px;text-align:center;padding:6px;border:1px solid rgba(255,58,47,0.2);background:rgba(255,58,47,0.04)">
+          LAST REVIEWED: <span id="babel-date">---</span> · B.WAYNE<br>
+          <span class="blink" style="color:rgba(255,58,47,0.7)">// THESE FILES EXIST SO THEY'RE NEVER NEEDED //</span>
+        </div>
+      </div>
+    </div>
+  </div><!-- end .bottom-row -->
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="footer">
+    <div>BATCOMPUTER v7.3.1 · WAYNE MANOR · ALL TRANSMISSIONS ENCRYPTED AES-512</div>
+    <div><a href="resume/">[ RESUME — GERROS.TECH/RESUME ]</a></div>
+    <div>© WAYNE ENTERPRISES R&amp;D · ACCESS LOGGED</div>
+  </footer>
+
+</div><!-- end .wrapper -->
+
+<script>
+// ── CLOCK & DATE ──────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+document.getElementById('date-display').textContent =
+  new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).toUpperCase();
+
+document.getElementById('babel-date').textContent =
+  new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'2-digit'}).toUpperCase();
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+function switchTab(group, id, el) {
+  document.querySelectorAll(`[id^="${group}-"]`).forEach(t => t.classList.remove('active'));
+  el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`${group}-${id}`).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── PROFILE EXPAND/COLLAPSE ───────────────────────────────────────────────────
+function toggleProfile(el) { el.classList.toggle('expanded'); }
+
+// ── GCPD FEED ─────────────────────────────────────────────────────────────────
+const gcpdLog = [
+  { level:'alert', msg:'10-34 Armed Robbery in progress — Amusement Mile, Neon St & 5th Ave' },
+  { level:'warn',  msg:'10-31 Residential burglary — Park Row unit 19 dispatched' },
+  { level:'info',  msg:'10-97 Unit 47 arrived on scene — Narrows District perimeter secured' },
+  { level:'alert', msg:'10-99 Officer assistance needed — Dixon Docks pier 7, multiple suspects' },
+  { level:'info',  msg:'10-23 Stand by — routine traffic stop O\'Neil Ave, vehicle matches APB' },
+  { level:'warn',  msg:'Dispatch: Reports of armed men in Tricorner Yards near warehouse 9' },
+  { level:'info',  msg:'10-4 Acknowledged — Unit 22 en route to Burnley Overpass' },
+  { level:'alert', msg:'PRIORITY: Possible hostage situation — Monarch Theatre, 3 suspects inside' },
+  { level:'warn',  msg:'Scanner: Unknown chemical smell reported near Port Authority shed C' },
+  { level:'warn',  msg:'APB: "Two-Bit Tommy" Carbone — biometric match cam-7, Amusement Mile' },
+  { level:'info',  msg:'Patrol update: All units, Burnley Overpass closed — avoid grid 4-C' },
+  { level:'alert', msg:'EMERGENCY: 3 civilians unconscious — Ace Chemicals east perimeter' },
+  { level:'info',  msg:'10-4 — Dispatch confirms suspicious cargo FC-91, Port Customs notified' },
+  { level:'warn',  msg:'Signal 7: Possible Riddler cipher left at GCPD evidence locker — 3rd this week' },
+];
+
+let gcpdIdx = 0;
+function addGCPDEntry() {
+  const feed = document.getElementById('gcpd-feed');
+  if (!feed) return;
+  const evt = gcpdLog[gcpdIdx % gcpdLog.length];
+  gcpdIdx++;
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const ts = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const div = document.createElement('div');
+  div.className = 'feed-entry';
+  const lMap = { alert:'[ALERT]', warn:'[WARN ]', info:'[INFO ]' };
+  div.innerHTML = `<span class="ts">${ts}</span><span class="level ${evt.level}">${lMap[evt.level]}</span><span class="msg">${evt.msg}</span>`;
+  feed.insertBefore(div, feed.firstChild);
+  while (feed.children.length > 22) feed.removeChild(feed.lastChild);
+}
+for (let i = 0; i < 9; i++) addGCPDEntry();
+setInterval(addGCPDEntry, 4200);
+
+// ── HEATMAP ───────────────────────────────────────────────────────────────────
+const heatColors = ['#001a0b','#004d22','#996b00','#cc6600','#cc2200'];
+function buildHeatmap() {
+  const hm = document.getElementById('heatmap');
+  if (!hm) return;
+  const base = [
+    [2,1,3,2,4,3,2,1,2,3,1,2],
+    [1,4,3,2,3,4,3,2,1,2,3,1],
+    [2,3,2,4,2,3,2,3,4,3,2,1],
+    [3,2,3,2,3,2,4,3,2,1,2,3],
+    [1,2,1,3,4,3,2,3,2,3,1,2],
+    [2,1,2,2,3,2,3,2,3,2,3,1],
+  ];
+  hm.innerHTML = '';
+  base.forEach(row => {
+    row.forEach(v => {
+      const cell = document.createElement('div');
+      cell.className = 'heatmap-cell';
+      const jitter = Math.random() > 0.88 ? Math.min(v + 1, 4) : (Math.random() > 0.92 ? Math.max(v - 1, 0) : v);
+      cell.style.background = heatColors[jitter];
+      cell.style.boxShadow = jitter >= 3 ? `0 0 4px ${heatColors[jitter]}` : 'none';
+      hm.appendChild(cell);
+    });
+  });
+}
+buildHeatmap();
+setInterval(buildHeatmap, 4500);
+
+// ── FACIAL RECOGNITION FEED ───────────────────────────────────────────────────
+const facialLog = [
+  { name:'"Two-Bit Tommy" Carbone', loc:'Cam-7 · Amusement Mile', conf:'97.3%', level:'alert' },
+  { name:'Vincent Maroni Jr.',       loc:'Cam-12 · Dixon Docks',   conf:'84.1%', level:'warn'  },
+  { name:'Elena Falcone',            loc:'Cam-34 · Midtown',       conf:'91.7%', level:'warn'  },
+  { name:'UNKNOWN — no DB match',    loc:'Cam-2 · Narrows',        conf:'—',     level:'info'  },
+  { name:'Ronnie "Axe" Simonetti',   loc:'Cam-19 · Burnley',       conf:'78.4%', level:'warn'  },
+  { name:'Jimmy Galante',            loc:'Cam-8 · Park Row',       conf:'93.2%', level:'alert' },
+  { name:'UNKNOWN — no DB match',    loc:'Cam-41 · Tricorner Yds', conf:'—',     level:'info'  },
+  { name:'Sal "The Fish" Moretti',   loc:'Cam-22 · Port Authority', conf:'88.0%', level:'warn' },
+  { name:'Denny Farachi',            loc:'Cam-5 · Uptown',         conf:'76.1%', level:'warn'  },
+  { name:'UNKNOWN — no DB match',    loc:'Cam-17 · Old Gotham',    conf:'—',     level:'info'  },
+];
+let facialIdx = 0;
+function addFacialEntry() {
+  const feed = document.getElementById('facial-feed');
+  if (!feed) return;
+  const evt = facialLog[facialIdx % facialLog.length];
+  facialIdx++;
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const ts = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const div = document.createElement('div');
+  div.className = 'feed-entry';
+  div.innerHTML = `<span class="ts">${ts}</span><span class="level ${evt.level}" style="min-width:180px">${evt.name}</span><span class="msg">${evt.loc} · [${evt.conf}]</span>`;
+  feed.insertBefore(div, feed.firstChild);
+  while (feed.children.length > 14) feed.removeChild(feed.lastChild);
+}
+for (let i = 0; i < 6; i++) addFacialEntry();
+setInterval(addFacialEntry, 3300);
+
+// ── SCAN COUNTERS ─────────────────────────────────────────────────────────────
+setInterval(() => {
+  const camEl = document.getElementById('cam-count');
+  const rateEl = document.getElementById('scan-rate');
+  if (camEl) camEl.textContent = 847 + Math.floor(Math.random() * 12 - 6);
+  if (rateEl) rateEl.textContent = (2.1 + Math.random() * 0.6).toFixed(1) + 'K';
+}, 1800);
+
+// ── WAYNE STOCK TICKER ────────────────────────────────────────────────────────
+const stocks = {
+  we:    { base: 410, el:'we-price',    chgEl:'we-chg'    },
+  wetech:{ base:  87, el:'wetech-price',chgEl:'wetech-chg' },
+  wemed: { base: 201, el:'wemed-price', chgEl:'wemed-chg'  },
+  wedef: { base: 339, el:'wedef-price', chgEl:'wedef-chg'  },
+};
+function tickStocks() {
+  Object.values(stocks).forEach(s => {
+    const price = (s.base + Math.random() * 6 - 1).toFixed(2);
+    const chg   = (Math.random() * 3 - 0.8).toFixed(2);
+    const up    = parseFloat(chg) >= 0;
+    const prEl  = document.getElementById(s.el);
+    const chEl  = document.getElementById(s.chgEl);
+    if (prEl) prEl.textContent = '$' + price;
+    if (chEl) {
+      chEl.textContent  = (up ? '▲ +' : '▼ ') + Math.abs(chg) + '%';
+      chEl.className    = 'stock-change ' + (up ? 'up' : 'down');
+    }
+  });
+}
+setInterval(tickStocks, 7000);
+
+// ── PROGRESS ANIMATIONS ───────────────────────────────────────────────────────
+let chemPct    = 78;
+let antidotePct = 67;
+let portPct    = 23;
+let armorPct   = 91;
+
+setInterval(() => {
+  if (chemPct < 100) {
+    chemPct = Math.min(100, chemPct + Math.floor(Math.random() * 2 + 1));
+    const b = document.getElementById('chem-bar'), p = document.getElementById('chem-pct');
+    if (b) b.style.width = chemPct + '%';
+    if (p) p.textContent = chemPct >= 100 ? 'DONE' : chemPct + '%';
+  }
+}, 6000);
+
+setInterval(() => {
+  if (antidotePct < 100) {
+    antidotePct = Math.min(100, antidotePct + 1);
+    const b = document.getElementById('antidote-bar'), p = document.getElementById('antidote-pct');
+    if (b) b.style.width = antidotePct + '%';
+    if (p) p.textContent = antidotePct >= 100 ? 'COMPLETE' : antidotePct + '%';
+  }
+}, 18000);
+
+setInterval(() => {
+  if (portPct < 100) {
+    portPct = Math.min(100, portPct + 1);
+    const b = document.getElementById('port-bar'), p = document.getElementById('port-pct');
+    if (b) b.style.width = portPct + '%';
+    if (p) p.textContent = portPct >= 100 ? 'DONE' : portPct + '%';
+  }
+}, 22000);
+
+setInterval(() => {
+  if (armorPct < 100) {
+    armorPct = Math.min(100, armorPct + 1);
+    const b = document.getElementById('armor-bar'), p = document.getElementById('armor-pct');
+    if (b) b.style.width = armorPct + '%';
+    if (p) p.textContent = armorPct >= 100 ? 'DONE' : armorPct + '%';
+  }
+}, 30000);
+
+// ── ACTIVE INCIDENTS COUNTER ──────────────────────────────────────────────────
+setInterval(() => {
+  const el = document.getElementById('incident-count');
+  if (el) el.textContent = 2 + Math.floor(Math.random() * 4);
+}, 15000);
+</script>
+</body>
+</html>
