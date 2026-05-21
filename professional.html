@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>William S. Gerros II — Professional Resume</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:#f4f1ec;
+  color:#1a1a1a;
+  font-family:'Jost',sans-serif;
+  font-size:14px;
+  line-height:1.65;
+}
+.back-link{
+  display:block;
+  text-align:center;
+  padding:12px;
+  font-size:11px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:#888;
+  text-decoration:none;
+  background:#ede9e1;
+  border-bottom:1px solid #ddd9d0;
+  transition:color .2s;
+}
+.back-link:hover{color:#1a1a1a}
+.shell{
+  max-width:840px;
+  margin:0 auto;
+  padding:60px 48px 80px;
+  background:#faf8f5;
+  min-height:100vh;
+  box-shadow:0 0 60px rgba(0,0,0,.08);
+}
+/* Header */
+.header{
+  text-align:center;
+  padding-bottom:32px;
+  border-bottom:2px solid #1a1a1a;
+  margin-bottom:32px;
+}
+.header h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:48px;
+  font-weight:600;
+  letter-spacing:.04em;
+  line-height:1;
+  margin-bottom:10px;
+  color:#1a1a1a;
+}
+.header .title-line{
+  font-size:11px;
+  letter-spacing:.25em;
+  text-transform:uppercase;
+  color:#666;
+  margin-bottom:18px;
+}
+.contact-bar{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:4px 20px;
+  font-size:12px;
+  color:#555;
+}
+.contact-bar a{color:#1a1a1a;text-decoration:none}
+.contact-bar a:hover{text-decoration:underline}
+.contact-bar .sep{color:#ccc}
+
+/* Sections */
+section{margin-bottom:36px}
+.section-head{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:18px;
+}
+.section-head h2{
+  font-family:'Cormorant Garamond',serif;
+  font-size:20px;
+  font-weight:500;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#1a1a1a;
+  white-space:nowrap;
+}
+.rule{flex:1;height:1px;background:#c8c3b8}
+.rule-l{width:32px;height:1px;background:#c8c3b8;flex-shrink:0}
+
+/* Competencies */
+.comp-cols{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px 32px;
+}
+.comp-cols li{
+  list-style:none;
+  padding-left:14px;
+  position:relative;
+  font-size:12.5px;
+  color:#333;
+  line-height:1.55;
+}
+.comp-cols li::before{
+  content:'';
+  position:absolute;
+  left:0;top:8px;
+  width:4px;height:4px;
+  border-radius:50%;
+  background:#1a1a1a;
+}
+
+/* Jobs */
+.job{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e8e4dc}
+.job:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.job-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:2px;
+}
+.job-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:18px;
+  font-weight:600;
+  color:#1a1a1a;
+  line-height:1.2;
+}
+.job-dates{
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#888;
+  white-space:nowrap;
+}
+.job-co{
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#555;
+  margin-bottom:10px;
+  font-weight:500;
+}
+.job-summary{
+  font-size:13px;
+  color:#444;
+  line-height:1.7;
+  margin-bottom:10px;
+  font-style:italic;
+  font-family:'Cormorant Garamond',serif;
+  font-size:15px;
+}
+.job-bullets{list-style:none;display:flex;flex-direction:column;gap:5px}
+.job-bullets li{
+  font-size:12.5px;
+  padding-left:20px;
+  position:relative;
+  color:#333;
+  line-height:1.6;
+}
+.job-bullets li::before{
+  content:'';
+  position:absolute;
+  left:6px;top:9px;
+  width:4px;height:1px;
+  background:#999;
+}
+
+/* Education */
+.edu-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+.edu-item{}
+.edu-degree{
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px;
+  font-weight:600;
+  color:#1a1a1a;
+  margin-bottom:2px;
+}
+.edu-school{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#777;margin-bottom:8px}
+.honor{
+  font-size:11px;
+  color:#555;
+  padding-left:12px;
+  position:relative;
+  line-height:1.5;
+}
+.honor::before{content:'›';position:absolute;left:0;color:#999}
+
+/* Certs */
+.cert-row{display:flex;flex-direction:column;gap:6px}
+.cert-item{
+  display:flex;align-items:baseline;gap:12px;
+  font-size:12.5px;color:#333;
+}
+.cert-item::before{content:'';display:block;width:16px;height:1px;background:#aaa;flex-shrink:0;position:relative;top:-3px}
+
+/* Footer */
+footer{
+  margin-top:48px;
+  padding-top:20px;
+  border-top:1px solid #c8c3b8;
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#aaa;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+@media print{
+  .back-link{display:none}
+  body{background:#fff}
+  .shell{box-shadow:none;padding:24px 36px}
+}
+@media(max-width:600px){
+  .comp-cols,.edu-row{grid-template-columns:1fr}
+  .shell{padding:32px 20px}
+  .job-top{flex-direction:column;gap:2px}
+}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-link">← Choose a Style</a>
+<div class="shell">
+  <div class="header">
+    <h1>William S. Gerros II</h1>
+    <div class="title-line">Cloud &amp; Infrastructure Leader · Executive Technology Management</div>
+    <div class="contact-bar">
+      <span>Phoenix, AZ 85042</span>
+      <span class="sep">|</span>
+      <span>(480) 335-2124</span>
+      <span class="sep">|</span>
+      <a href="mailto:bgerros@gmail.com">bgerros@gmail.com</a>
+      <span class="sep">|</span>
+      <a href="https://www.linkedin.com/in/william-gerros" target="_blank" rel="noopener">linkedin.com/in/william-gerros</a>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-head"><div class="rule-l"></div><h2>Core Competencies</h2><div class="rule"></div></div>
+    <ul class="comp-cols">
+      <li>Collaboration-style leadership with emphasis on enterprise solutions and global sustainability</li>
+      <li>Accountability through goal setting, pay for performance, and performance management</li>
+      <li>Execution and delivery of project implementations with on-time, in-budget delivery</li>
+      <li>Talent development and global best practices through industry standards and continuous improvement</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-head"><div class="rule-l"></div><h2>Professional Experience</h2><div class="rule"></div></div>
+
+    <div class="job">
+      <div class="job-top"><div class="job-title">Cloud Administration Manager</div><div class="job-dates">2024 – 2026</div></div>
+      <div class="job-co">Husch Blackwell &mdash; AmLaw 200 National Law Firm</div>
+      <p class="job-summary">Recruited to lead systems administration at a national law firm, elevating the function from identity-focused operations to a full-spectrum systems administration practice while establishing enterprise-wide governance centered on accountability and disciplined change management.</p>
+      <ul class="job-bullets">
+        <li>Spearheaded team-wide skills development, upskilling administrators to include enterprise print and fax services, Genetec physical security, GPO design, and Exchange/Office 365 migration</li>
+        <li>Owned enterprise identity management lifecycle including onboarding and offboarding, ensuring security compliance and operational continuity across the agency</li>
+        <li>Executed a comprehensive server environment remediation program, decommissioning legacy infrastructure and migrating services to Office 365 and Exchange</li>
+        <li>Introduced metrics and reporting discipline, delivering routine performance data to senior leadership and developing operational dashboards cross-functionally</li>
+        <li>Assumed organizational ownership of the Change Control process, instituting failed change reviews and standardized change classifications</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-top"><div class="job-title">Senior Global Infrastructure Service Delivery Manager</div><div class="job-dates">2021 – 2024</div></div>
+      <div class="job-co">Majorel – Teleperformance &mdash; Global BPO, 9-Country Portfolio</div>
+      <p class="job-summary">Served in a director-level capacity leading a globally distributed infrastructure team with full ownership of network, server, and telecommunications operations. Championed ITIL and COBIT frameworks across multi-country operations.</p>
+      <ul class="job-bullets">
+        <li>Transformed global patch management, compressing critical vulnerability response from years to same-day remediation across a multi-country infrastructure footprint</li>
+        <li>Engineered a standardized global infrastructure onboarding framework, reducing time-to-production-readiness from months to four weeks or less</li>
+        <li>Developed and executed a multi-year enterprise hardware refresh strategy, building annual capital plans and negotiating vendor contracts across all supported regions</li>
+        <li>Led strategic decommissioning of a redundant data center, delivering <strong>$325,000 in annualized cost savings</strong></li>
+        <li>Directed technology integration of an acquired business division during a corporate M&amp;A transaction</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-top"><div class="job-title">IT Service Manager</div><div class="job-dates">2019 – 2021</div></div>
+      <div class="job-co">Arizona Attorney General's Office &mdash; Statewide Government Law Enforcement</div>
+      <p class="job-summary">Recruited to revitalize the IT service delivery function, transforming an underperforming team into a high-capability, metrics-driven organization aligned to ITIL principles serving 1,100 employees statewide.</p>
+      <ul class="job-bullets">
+        <li>Directed an 8-person technology services team delivering enterprise-wide support across Windows, macOS, mobile, and field operations</li>
+        <li>Drove adoption of ITIL service management principles, elevating service quality and establishing a foundation for scalable, repeatable IT operations</li>
+        <li>Tripled the organization's procedural documentation library, standardizing technical processes and eliminating institutional knowledge risk</li>
+        <li>Orchestrated rapid enablement of remote work for <strong>95% of agency staff</strong> during a large-scale emergency with minimal disruption to government operations</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-top"><div class="job-title">IT Business Partner – US</div><div class="job-dates">2018 – 2019</div></div>
+      <div class="job-co">Accelerated Enrollment Solutions (formerly Synexus) &mdash; Global Clinical Research</div>
+      <p class="job-summary">Senior technology executive representative for US operations, serving as strategic liaison between business and IT. Full accountability for IT prioritization and cross-functional alignment with HIPAA, FDA, and GDPR requirements.</p>
+      <ul class="job-bullets">
+        <li>Championed enterprise adoption of AWS and Azure, modernizing the technology portfolio and enabling scalable, resilient infrastructure for global clinical operations</li>
+        <li>Directed enterprise-wide adoption of SD-WAN technology, substantially improving site reliability across distributed research locations</li>
+        <li>Constructed the organization's inaugural <strong>$2.5M technology budget</strong> with formal financial governance and monthly spend reconciliation</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-top"><div class="job-title">Desktop Support Manager</div><div class="job-dates">2014 – 2017</div></div>
+      <div class="job-co">Cable One, Inc. &mdash; Enterprise Technology Services, 2,500 Employees</div>
+      <p class="job-summary">Recruited to transform an underperforming technology services function. Rebuilt a 10-person team into an enterprise-recognized organization whose members were actively recruited for advancement across the broader technology division.</p>
+      <ul class="job-bullets">
+        <li>Reduced average incident resolution time by more than <strong>85%</strong>, compressing from three weeks to under three days through process redesign and service desk optimization</li>
+        <li>Sustained a 100% critical incident resolution rate within the 4-hour SLA for three consecutive quarters</li>
+        <li>Managed an <strong>$850K annual capital budget</strong> for a three-year enterprise PC refresh program</li>
+        <li>Achieved the largest year-over-year improvement in employee satisfaction of any department company-wide</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-top"><div class="job-title">Senior Analyst</div><div class="job-dates">1999 – 2014</div></div>
+      <div class="job-co">Salt River Project &mdash; Major Public Utility, 15-Year Tenure</div>
+      <p class="job-summary">Held progressive responsibility across desktop support leadership, enterprise document management, and mission-critical communication platforms, building the foundational technical and leadership capabilities that defined the career trajectory ahead.</p>
+      <ul class="job-bullets">
+        <li>Led digital transformation migrating field personnel from paper-based workflows to digital platforms, reducing operational costs and establishing repeatable processes</li>
+        <li>Spearheaded implementation of an ITIL-aligned service management platform improving service visibility and accountability</li>
+        <li>Provided broad platform support across MS Exchange, SharePoint, MDM, UNIX, Windows desktop, and Windows Server</li>
+        <li>Authored and maintained a comprehensive disaster recovery plan with annual rehearsals and documentation reviews</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><div class="rule-l"></div><h2>Education</h2><div class="rule"></div></div>
+    <div class="edu-row">
+      <div class="edu-item">
+        <div class="edu-degree">Master of Science in Information Management</div>
+        <div class="edu-school">Arizona State University, Tempe, AZ</div>
+        <div class="honor">Best Applied Project — ASU MSIM Program</div>
+        <div class="honor">Beta Gamma Sigma Honors Society</div>
+      </div>
+      <div class="edu-item">
+        <div class="edu-degree">Bachelor of Science in Business Management</div>
+        <div class="edu-school">Arizona State University, Tempe, AZ</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><div class="rule-l"></div><h2>Certifications</h2><div class="rule"></div></div>
+    <div class="cert-row">
+      <div class="cert-item">ITIL Foundation v3 Certification</div>
+      <div class="cert-item">HDI Desktop Support Manager Certification</div>
+      <div class="cert-item">Lean IT Association – Lean IT Leadership Certification</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>William S. Gerros II &mdash; Phoenix, AZ</span>
+    <span>Updated 2026</span>
+  </footer>
+</div>
+</body>
+</html>

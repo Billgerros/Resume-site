@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>William S. Gerros II — Resume</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:#0a0a0a;
+  color:#e5e5e5;
+  font-family:'IBM Plex Mono',monospace;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:24px;
+  overflow:hidden;
+}
+
+/* animated grid bg */
+.grid-bg{
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:40px 40px;
+  animation:gridDrift 30s linear infinite;
+  z-index:0;
+}
+@keyframes gridDrift{to{background-position:40px 40px}}
+
+.glow{
+  position:fixed;
+  width:600px;height:600px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(74,222,128,.06) 0%,transparent 70%);
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  animation:pulse 4s ease-in-out infinite;
+  z-index:0;
+}
+@keyframes pulse{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
+
+.card{
+  position:relative;z-index:1;
+  max-width:640px;width:100%;
+  border:1px solid #252525;
+  border-radius:12px;
+  background:#111;
+  padding:40px 40px 36px;
+  animation:fadeUp .6s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.eyebrow{
+  font-size:10px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:#4ade80;
+  margin-bottom:16px;
+}
+.eyebrow span{color:#555}
+
+h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(24px,4vw,36px);
+  font-weight:700;
+  color:#fff;
+  line-height:1.15;
+  margin-bottom:6px;
+}
+h1 em{color:#4ade80;font-style:normal}
+
+.subtitle{
+  font-size:12px;
+  color:#737373;
+  margin-bottom:32px;
+  line-height:1.6;
+}
+
+.prompt-line{
+  font-size:11px;
+  color:#555;
+  margin-bottom:16px;
+  letter-spacing:.05em;
+}
+.prompt-line span{color:#4ade80}
+
+.choices{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+@media(max-width:480px){.choices{grid-template-columns:1fr}}
+
+.choice-btn{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:16px 18px;
+  border:1px solid #252525;
+  border-radius:8px;
+  background:#0d0d0d;
+  cursor:pointer;
+  text-decoration:none;
+  transition:border-color .2s,background .2s,transform .15s;
+  position:relative;
+  overflow:hidden;
+}
+.choice-btn::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity .3s;
+}
+.choice-btn:hover{transform:translateY(-2px)}
+.choice-btn:active{transform:translateY(0)}
+
+.choice-btn.classic{--accent:#6b7280}
+.choice-btn.professional{--accent:#3b82f6}
+.choice-btn.zoomer{--accent:#a855f7}
+.choice-btn.retro{--accent:#f97316}
+
+.choice-btn:hover{border-color:var(--accent);background:#141414}
+.choice-btn::before{background:radial-gradient(circle at 0% 0%,color-mix(in srgb,var(--accent) 8%,transparent),transparent 60%)}
+.choice-btn:hover::before{opacity:1}
+
+.choice-icon{font-size:20px;margin-bottom:4px}
+.choice-name{
+  font-size:13px;
+  font-weight:500;
+  color:#e5e5e5;
+  letter-spacing:.02em;
+}
+.choice-desc{
+  font-size:10px;
+  color:#555;
+  line-height:1.5;
+}
+
+.footer-note{
+  margin-top:28px;
+  font-size:10px;
+  color:#404040;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow"></div>
+
+<div class="card">
+  <div class="eyebrow"><span>$</span> gerros.tech/resume <span>~</span></div>
+  <h1>William S. <em>Gerros</em> II</h1>
+  <p class="subtitle">Cloud &amp; Infrastructure Leader · Phoenix, AZ<br>25+ years building enterprise technology organizations</p>
+
+  <div class="prompt-line"><span>&gt;</span> SELECT_RESUME_FORMAT</div>
+
+  <div class="choices">
+    <a href="classic.html" class="choice-btn classic">
+      <div class="choice-icon">📄</div>
+      <div class="choice-name">Classic</div>
+      <div class="choice-desc">Clean terminal aesthetic. Dark, minimal, developer-focused.</div>
+    </a>
+    <a href="professional.html" class="choice-btn professional">
+      <div class="choice-icon">💼</div>
+      <div class="choice-name">Professional</div>
+      <div class="choice-desc">Traditional executive resume. Print-ready, polished, boardroom-ready.</div>
+    </a>
+    <a href="zoomer.html" class="choice-btn zoomer">
+      <div class="choice-icon">✦</div>
+      <div class="choice-name">Zoomer</div>
+      <div class="choice-desc">Bold gradients, glassmorphism, and high-energy Gen Z vibes.</div>
+    </a>
+    <a href="retro.html" class="choice-btn retro">
+      <div class="choice-icon">🌭</div>
+      <div class="choice-name">Retro / Hot Dog</div>
+      <div class="choice-desc">Windows 3.1 Hot Dog Stand theme. Pure 1992 chaos energy.</div>
+    </a>
+  </div>
+
+  <div class="footer-note">All versions contain identical resume content · gerros.tech</div>
+</div>
+</body>
+</html>
